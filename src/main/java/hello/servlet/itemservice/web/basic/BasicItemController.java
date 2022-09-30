@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
@@ -75,13 +76,31 @@ public class BasicItemController {
     }
 
     //위의 예제를 좀 더 개선
-    @PostMapping("/add")
+//    @PostMapping("/add")
     public String addItemV4(Item item) { //string이나 이런 단순타입이 오면 requestParam이지만 여기선 ModelAttribute 애노테이션도 생략이 가능하다.
         //("item") 요거를 지우면 -> 첫글자를 소문자로 바꿔서 item이 이름이 된다.
         itemRepository.save(item);
 
         return "basic/item";
     }
+
+    //위의 예제를 좀 더 개선
+//    @PostMapping("/add")
+    public String addItemV5(Item item) {
+        itemRepository.save(item);
+        return "redirect:/basic/items/"+item.getId();
+    }
+
+    //위의 예제를 좀 더 개선
+    @PostMapping("/add")
+    public String addItemV6(Item item, RedirectAttributes redirectAttributes) {
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId());
+        redirectAttributes.addAttribute("status", true);
+        //redirectAttribute를 사용하면 아래 치환되서 들어간다. 근데 없는거는? ?status=true 이런식으로 뒤에 붙음
+        return "redirect:/basic/items/{itemId}";
+    }
+
 
     @GetMapping("{itemId}/edit")
     public String editForm(@PathVariable Long itemId, Model model) {
